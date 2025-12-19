@@ -17,6 +17,72 @@ This project demonstrates the complete end-to-end pipeline for FPGA-based hardwa
 - ✅ **Resource Efficiency**: Fits within PYNQ-Z2 constraints (70% BRAM, 14% DSP, 62% LUT)
 - ✅ **Hardware Validation**: Successfully deployed and tested on PYNQ-Z2 board
 
+## 📸 Proof of Work & Validation
+
+### Hardware Deployment Evidence
+
+Our project includes comprehensive validation artifacts demonstrating successful end-to-end implementation:
+
+#### 1. **HLS Synthesis Reports** 
+- C Simulation: 0 errors, MSE = 0 on 10 test images
+- Timing closure achieved: WNS = 0.183 ns (positive slack ✓)
+- Resource estimates validated against final implementation
+- See: [Interactive Resource Utilization](https://msundarar19.github.io/ECE588_FinalProject/viz_resource_utilization.html)
+
+#### 2. **Vivado Implementation**
+- Post-implementation timing: No violations
+- Power analysis: 1.451 W total on-chip power
+- Bitstream generation successful: `design_1_wrapper.bit` (45 MB)
+- See: [Design Workflow Visualization](https://msundarar19.github.io/ECE588_FinalProject/viz_design_workflow.html)
+
+#### 3. **PYNQ Hardware Execution**
+```
+[PYNQ Deployment Log - December 2025]
+✓ Bitstream loaded successfully
+✓ 52 parameter arrays loaded (1,441,066 values)
+✓ 54 FPGA memory buffers allocated (~5.5 MB)
+✓ All 96 AXI addresses configured
+
+Hardware Performance:
+- Parameter Sync Time: 6.78 ms
+- Computation Time: 459.75 ms
+- Total Latency: 466.53 ms
+- Predicted Class: airplane (correct)
+- Power Consumption: 1.451 W
+```
+
+#### 4. **Interactive Visualizations**
+All design decisions, performance metrics, and architecture details are documented in interactive visualizations:
+- [Complete Performance Comparison](https://msundarar19.github.io/ECE588_FinalProject/viz_performance_comparison.html)
+- [Decision Framework & Trade-offs](https://msundarar19.github.io/ECE588_FinalProject/viz_decision_framework.html)
+- [Memory Architecture Analysis](https://msundarar19.github.io/ECE588_FinalProject/viz_memory_architecture.html)
+
+### Validation Methodology
+
+Our validation follows a rigorous multi-stage approach:
+
+1. **Functional Verification** (C Simulation)
+   - Bit-accurate C++ model tested against PyTorch golden reference
+   - 10 CIFAR-10 test images: 100% match
+   - MSE = 0 between C simulation and PyTorch
+
+2. **RTL Verification** (HLS Synthesis)
+   - Timing analysis: All paths meet 15 ns constraint
+   - Resource utilization: Within Zynq-7020 limits
+   - Latency bounds: 7.98 ms (best) to 256 sec (worst with stalls)
+
+3. **Hardware Validation** (PYNQ Deployment)
+   - Actual measured latency: 466.53 ms
+   - Accuracy on hardware: 85.59% (within 1.35% of GPU)
+   - Correct classification on test images
+   - Power consumption verified: 1.451 W
+
+4. **Performance Benchmarking**
+   - Direct GPU comparison on same dataset
+   - Memory bandwidth analysis
+   - Energy efficiency measurements
+   - See: [Comprehensive Performance Analysis](https://msundarar19.github.io/ECE588_FinalProject/viz_performance_comparison.html)
+
 ## 📊 Performance Summary
 
 ### GPU vs FPGA Comparison
@@ -113,35 +179,57 @@ typedef ap_fixed<32,24> acc_t;  // Accumulator (Q24.8)
 ```
 ECE588_FinalProject/
 ├── README.md                           # This file
+├── LICENSE                             # MIT License
+├── CONTRIBUTING.md                     # Contribution guidelines
+├── .gitignore                          # Git ignore patterns
+│
 ├── report/
 │   └── ECE588_Final_Project_Report.pdf # Comprehensive 39-page report
+│
 ├── training/
 │   ├── copy.ipynb                      # PyTorch training notebook
+│   ├── ece588_finalGPU.ipynb          # GPU performance benchmarking
 │   └── models/
 │       └── reduced_vgg_best.pth        # Trained model checkpoint
+│
 ├── hls/
 │   ├── tiled_conv.hpp                  # Header: data types & constants
 │   ├── tiled_conv.cpp                  # Top-level HLS inference function
 │   ├── utils.cpp                       # Layer implementations
+│   ├── utils.hpp                       # Utility function headers
 │   ├── tb_conv.cpp                     # C++ testbench
 │   ├── Makefile                        # Build automation
 │   ├── vitis_hls.tcl                   # HLS synthesis script
 │   └── run_csim.tcl                    # C simulation script
+│
 ├── weights/
 │   ├── params_int32/                   # INT32 quantized weights (60 files)
 │   ├── params_int16/                   # INT16 converted weights (48 files)
-│   └── convert_weights.py              # INT32→INT16 converter
+│   ├── convert_weights.py              # INT32→INT16 converter
+│   └── create_test_files.py            # Test data generator
+│
 ├── vivado/
 │   ├── design_1.bd                     # Block design
 │   └── constraints/                    # Timing constraints
+│
 ├── pynq/
 │   ├── design_1_wrapper.bit            # FPGA bitstream (45 MB)
 │   ├── design_1.hwh                    # Hardware handoff
 │   └── deploy_pynq_runtime.py          # Deployment script
+│
+├── visualizations/                     # Interactive HTML visualizations
+│   ├── viz_decision_framework.html     # Design decision tree
+│   ├── viz_design_workflow.html        # Implementation pipeline
+│   ├── viz_memory_architecture.html    # Memory organization
+│   ├── viz_performance_comparison.html # GPU vs FPGA metrics
+│   └── viz_resource_utilization.html   # FPGA resource breakdown
+│
 └── docs/
     ├── setup.md                        # Environment setup guide
     └── usage.md                        # Usage instructions
 ```
+
+> **💡 Tip**: Explore the [interactive visualizations](https://msundarar19.github.io/ECE588_FinalProject/) to understand the complete design flow and performance analysis.
 
 ## 🚀 Quick Start
 
@@ -218,6 +306,28 @@ scp -r weights/params_int16/ xilinx@192.168.2.99:~/
 ssh xilinx@192.168.2.99
 python3 deploy_pynq_runtime.py
 ```
+
+## 📊 Interactive Visualizations
+
+Explore detailed interactive visualizations of our implementation and results:
+
+### 🎨 Design & Architecture
+- **[Decision Framework](https://msundarar19.github.io/ECE588_FinalProject/viz_decision_framework.html)** - Complete design decision tree and rationale
+- **[Design Workflow](https://msundarar19.github.io/ECE588_FinalProject/viz_design_workflow.html)** - End-to-end implementation pipeline
+- **[Memory Architecture](https://msundarar19.github.io/ECE588_FinalProject/viz_memory_architecture.html)** - DDR and BRAM memory organization
+
+### ⚡ Performance Analysis
+- **[Performance Comparison](https://msundarar19.github.io/ECE588_FinalProject/viz_performance_comparison.html)** - GPU vs FPGA comprehensive metrics
+- **[Resource Utilization](https://msundarar19.github.io/ECE588_FinalProject/viz_resource_utilization.html)** - FPGA resource breakdown (BRAM, DSP, LUT, FF)
+
+### ✅ Validation & Proofs of Work
+These visualizations provide evidence of:
+- ✓ Complete hardware-software co-design methodology
+- ✓ Systematic performance measurement and analysis
+- ✓ Thorough resource utilization optimization
+- ✓ End-to-end validation from training to deployment
+
+> **Note**: These interactive HTML visualizations are best viewed in a modern web browser with JavaScript enabled.
 
 ## 📈 Results & Analysis
 
@@ -318,7 +428,6 @@ Despite the performance gap vs GPU, this project successfully:
 4. PYNQ Project, "Python productivity for Zynq," [http://www.pynq.io/](http://www.pynq.io/)
 5. C. Zhang et al., "Optimizing FPGA-based accelerator design for deep convolutional neural networks," FPGA 2015.
 
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -326,7 +435,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Authors
 
 - **Meenakshi Sridharan Sundaram** - [msridharansundaram@hawk.illinoistech.edu](mailto:msridharansundaram@hawk.illinoistech.edu)
--
+- **Sai Ayush** - [sayush@hawk.illinoistech.edu](mailto:sayush@hawk.illinoistech.edu)
+
 ---
 
 **Project Status**: ✅ Complete (December 2025)  
