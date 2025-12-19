@@ -8,11 +8,6 @@
 
 This project demonstrates the complete end-to-end pipeline for FPGA-based hardware acceleration of deep learning models, specifically a ReducedVGG architecture for CIFAR-10 classification. The implementation covers the full workflow from PyTorch training through High-Level Synthesis (HLS) to actual hardware deployment on the PYNQ-Z2 board.
 
-**Course**: ECE 588 - Secure Machine Learning  
-**Institution**: Illinois Institute of Technology  
-**Authors**: Meenakshi Sridharan Sundaram, Sai Ayush  
-**Date**: December 2025
-
 ## 🎯 Key Achievements
 
 - ✅ **Complete FPGA Deployment Pipeline**: PyTorch → HLS → Vivado → PYNQ
@@ -314,8 +309,6 @@ Despite the performance gap vs GPU, this project successfully:
 ## 📚 Documentation
 
 - **[Full Report](report/ECE588_Final_Project_Report.pdf)**: Comprehensive 39-page technical report with detailed analysis
-- **[Setup Guide](docs/setup.md)**: Environment configuration and installation
-- **[Usage Guide](docs/usage.md)**: Step-by-step execution instructions
 
 ## 📖 References
 
@@ -325,13 +318,6 @@ Despite the performance gap vs GPU, this project successfully:
 4. PYNQ Project, "Python productivity for Zynq," [http://www.pynq.io/](http://www.pynq.io/)
 5. C. Zhang et al., "Optimizing FPGA-based accelerator design for deep convolutional neural networks," FPGA 2015.
 
-## 🙏 Acknowledgments
-
-We thank:
-- **Professor Ken Choi** and the ECE 588 teaching staff for guidance throughout this project
-- **Xilinx/AMD** for providing Vitis HLS and Vivado development tools
-- **PYNQ community** for the excellent FPGA development framework
-- **Illinois Institute of Technology** for computational resources
 
 ## 📝 License
 
@@ -340,8 +326,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Authors
 
 - **Meenakshi Sridharan Sundaram** - [msridharansundaram@hawk.illinoistech.edu](mailto:msridharansundaram@hawk.illinoistech.edu)
-- **Sai Ayush** - [sayush@hawk.illinoistech.edu](mailto:sayush@hawk.illinoistech.edu)
-
+-
 ---
 
 **Project Status**: ✅ Complete (December 2025)  
