@@ -27,13 +27,13 @@ Our project includes comprehensive validation artifacts demonstrating successful
 - C Simulation: 0 errors, MSE = 0 on 10 test images
 - Timing closure achieved: WNS = 0.183 ns (positive slack ✓)
 - Resource estimates validated against final implementation
-- See: [Interactive Resource Utilization](https://msundarar19.github.io/ECE588_FinalProject/viz_resource_utilization.html)
+- See: [Interactive Resource Utilization](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_resource_utilization.html)
 
 #### 2. **Vivado Implementation**
 - Post-implementation timing: No violations
 - Power analysis: 1.451 W total on-chip power
 - Bitstream generation successful: `design_1_wrapper.bit` (45 MB)
-- See: [Design Workflow Visualization](https://msundarar19.github.io/ECE588_FinalProject/viz_design_workflow.html)
+- See: [Design Workflow Visualization](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_design_workflow.html)
 
 #### 3. **PYNQ Hardware Execution**
 ```
@@ -53,9 +53,9 @@ Hardware Performance:
 
 #### 4. **Interactive Visualizations**
 All design decisions, performance metrics, and architecture details are documented in interactive visualizations:
-- [Complete Performance Comparison](https://msundarar19.github.io/ECE588_FinalProject/viz_performance_comparison.html)
-- [Decision Framework & Trade-offs](https://msundarar19.github.io/ECE588_FinalProject/viz_decision_framework.html)
-- [Memory Architecture Analysis](https://msundarar19.github.io/ECE588_FinalProject/viz_memory_architecture.html)
+- [Complete Performance Comparison](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_performance_comparison.html)
+- [Decision Framework & Trade-offs](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_decision_framework.html)
+- [Memory Architecture Analysis](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_memory_architecture.html)
 
 ### Validation Methodology
 
@@ -81,7 +81,7 @@ Our validation follows a rigorous multi-stage approach:
    - Direct GPU comparison on same dataset
    - Memory bandwidth analysis
    - Energy efficiency measurements
-   - See: [Comprehensive Performance Analysis](https://msundarar19.github.io/ECE588_FinalProject/viz_performance_comparison.html)
+   - See: [Comprehensive Performance Analysis](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_performance_comparison.html)
 
 ## 📊 Performance Summary
 
@@ -177,7 +177,7 @@ typedef ap_fixed<32,24> acc_t;  // Accumulator (Q24.8)
 ## 📁 Project Structure
 
 ```
-ECE588_FinalProject/
+fpga_cnn_accelerator/
 ├── README.md                           # This file
 ├── LICENSE                             # MIT License
 ├── CONTRIBUTING.md                     # Contribution guidelines
@@ -229,7 +229,7 @@ ECE588_FinalProject/
     └── usage.md                        # Usage instructions
 ```
 
-> **💡 Tip**: Explore the [interactive visualizations](https://msundarar19.github.io/ECE588_FinalProject/) to understand the complete design flow and performance analysis.
+> **💡 Tip**: Explore the [interactive visualizations](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/) to understand the complete design flow and performance analysis.
 
 ## 🚀 Quick Start
 
@@ -312,13 +312,13 @@ python3 deploy_pynq_runtime.py
 Explore detailed interactive visualizations of our implementation and results:
 
 ### 🎨 Design & Architecture
-- **[Decision Framework](https://msundarar19.github.io/ECE588_FinalProject/viz_decision_framework.html)** - Complete design decision tree and rationale
-- **[Design Workflow](https://msundarar19.github.io/ECE588_FinalProject/viz_design_workflow.html)** - End-to-end implementation pipeline
-- **[Memory Architecture](https://msundarar19.github.io/ECE588_FinalProject/viz_memory_architecture.html)** - DDR and BRAM memory organization
+- **[Decision Framework](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_decision_framework.html)** - Complete design decision tree and rationale
+- **[Design Workflow](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_design_workflow.html)** - End-to-end implementation pipeline
+- **[Memory Architecture](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_memory_architecture.html)** - DDR and BRAM memory organization
 
 ### ⚡ Performance Analysis
-- **[Performance Comparison](https://msundarar19.github.io/ECE588_FinalProject/viz_performance_comparison.html)** - GPU vs FPGA comprehensive metrics
-- **[Resource Utilization](https://msundarar19.github.io/ECE588_FinalProject/viz_resource_utilization.html)** - FPGA resource breakdown (BRAM, DSP, LUT, FF)
+- **[Performance Comparison](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_performance_comparison.html)** - GPU vs FPGA comprehensive metrics
+- **[Resource Utilization](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/viz_resource_utilization.html)** - FPGA resource breakdown (BRAM, DSP, LUT, FF)
 
 ### ✅ Validation & Proofs of Work
 These visualizations provide evidence of:
@@ -419,6 +419,7 @@ Despite the performance gap vs GPU, this project successfully:
 ## 📚 Documentation
 
 - **[Full Report](report/ECE588_Final_Project_Report.pdf)**: Comprehensive 39-page technical report with detailed analysis
+- **[Interactive Visualizations](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/)**: Explore design decisions and performance metrics
 
 ## 📖 References
 
@@ -432,7 +433,7 @@ Despite the performance gap vs GPU, this project successfully:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Authors
+## 👥 collaborators
 
 - **Meenakshi Sridharan Sundaram** - [msridharansundaram@hawk.illinoistech.edu](mailto:msridharansundaram@hawk.illinoistech.edu)
 - **Sai Ayush** - [sayush@hawk.illinoistech.edu](mailto:sayush@hawk.illinoistech.edu)
@@ -441,4 +442,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Project Status**: ✅ Complete (December 2025)  
 **Hardware Validated**: ✅ Yes (PYNQ-Z2)  
-**Report Available**: ✅ Yes ([Download PDF](report/ECE588_Final_Project_Report.pdf))
+**Report Available**: ✅ Yes ([Download PDF](report/ECE588_Final_Project_Report.pdf))  
+**Interactive Demos**: ✅ [Live Visualizations](https://msundara19.github.io/fpga_cnn_accelerator/visualizations/)
