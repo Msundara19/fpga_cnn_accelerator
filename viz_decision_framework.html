@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU vs FPGA Decision Framework</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .decision-node {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 3px solid #ff9800;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .decision-question {
+            font-weight: bold;
+            font-size: 16px;
+            color: #e65100;
+            margin-bottom: 10px;
+        }
+        .decision-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .option-button {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .option-button:hover {
+            transform: scale(1.02);
+        }
+        .option-yes {
+            background: #e8f5e9;
+            border: 2px solid #4CAF50;
+            color: #2e7d32;
+        }
+        .option-no {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+        .result-node {
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid;
+            margin: 20px 0;
+        }
+        .result-gpu {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-color: #4CAF50;
+        }
+        .result-fpga {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-color: #2196F3;
+        }
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .result-gpu .result-title {
+            color: #2e7d32;
+        }
+        .result-fpga .result-title {
+            color: #1565c0;
+        }
+        .result-reasons {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        .result-reasons li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+        .result-reasons li:before {
+            content: "✓";
+            position: absolute;
+            left: 5px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .result-gpu .result-reasons li:before {
+            color: #4CAF50;
+        }
+        .result-fpga .result-reasons li:before {
+            color: #2196F3;
+        }
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .criteria-card {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        .criteria-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .criteria-card.gpu-card {
+            border-color: #4CAF50;
+        }
+        .criteria-card.gpu-card h3 {
+            color: #2e7d32;
+        }
+        .criteria-card.fpga-card {
+            border-color: #2196F3;
+        }
+        .criteria-card.fpga-card h3 {
+            color: #1565c0;
+        }
+        .criteria-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .criteria-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+        .criteria-list li:before {
+            content: "→";
+            position: absolute;
+            left: 5px;
+            color: #666;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #999;
+            margin: 10px 0;
+        }
+        .quick-decision {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+        .quick-decision h3 {
+            margin-top: 0;
+            color: #6a1b9a;
+        }
+        .quick-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .quick-table th {
+            background: #6a1b9a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .quick-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        .quick-table tr:last-child td {
+            border-bottom: none;
+        }
+        .quick-table .requirement {
+            font-weight: 500;
+            color: #333;
+        }
+        .quick-table .choice {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GPU vs FPGA Decision Framework</h1>
+        <p class="subtitle">A practical guide based on real implementation experience</p>
+
+        <div class="quick-decision">
+            <h3>⚡ Quick Decision Table</h3>
+            <table class="quick-table">
+                <thead>
+                    <tr>
+                        <th>Your Requirement</th>
+                        <th>Recommended Choice</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="requirement">Sub-5ms latency needed</td>
+                        <td class="choice" style="color: #4CAF50;">GPU</td>
+                        <td>360× faster in this comparison</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Power budget &lt;5W</td>
+                        <td class="choice" style="color: #2196F3;">FPGA</td>
+                        <td>48× lower power consumption</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Batch processing acceptable</td>
+                        <td class="choice" style="color: #4CAF50;">GPU</td>
+                        <td>Throughput scales well with batching</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Deterministic latency required</td>
+                        <td class="choice" style="color: #2196F3;">FPGA</td>
+                        <td>Zero jitter, consistent timing</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Model &gt;10M parameters</td>
+                        <td class="choice" style="color: #4CAF50;">GPU</td>
+                        <td>FPGA memory constraints</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Edge deployment (1000+ units)</td>
+                        <td class="choice" style="color: #2196F3;">FPGA</td>
+                        <td>Lower cost at scale</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Custom sensor preprocessing</td>
+                        <td class="choice" style="color: #2196F3;">FPGA</td>
+                        <td>Integrated pipeline on single chip</td>
+                    </tr>
+                    <tr>
+                        <td class="requirement">Need training + inference</td>
+                        <td class="choice" style="color: #4CAF50;">GPU</td>
+                        <td>FPGA inference-only</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flowchart">
+            <div class="decision-node">
+                <div class="decision-question">📊 Can you embed model weights in FPGA BRAM?</div>
+                <div style="font-size: 13px; color: #666; margin-top: 5px;">
+                    (Model &lt;2MB, infrequent updates)
+                </div>
+                <div class="decision-options">
+                    <div class="option-button option-yes">YES → Continue to next question</div>
+                    <div class="option-button option-no">NO → Choose GPU</div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="decision-node">
+                <div class="decision-question">⚡ Do you have steady power supply?</div>
+                <div style="font-size: 13px; color: #666; margin-top: 5px;">
+                    (AC power or large battery)
+                </div>
+                <div class="decision-options">
+                    <div class="option-button option-yes">YES → Choose GPU</div>
+                    <div class="option-button option-no">NO → Continue to next question</div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="decision-node">
+                <div class="decision-question">🎯 Need deterministic latency &lt;10ms?</div>
+                <div style="font-size: 13px; color: #666; margin-top: 5px;">
+                    (Real-time control, safety-critical)
+                </div>
+                <div class="decision-options">
+                    <div class="option-button option-yes">YES → Choose FPGA</div>
+                    <div class="option-button option-no">NO → Consider both based on other factors</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="criteria-grid">
+            <div class="criteria-card gpu-card">
+                <h3>🚀 Choose GPU If:</h3>
+                <ul class="criteria-list">
+                    <li>You have steady power supply (AC or large battery)</li>
+                    <li>Batch processing is acceptable</li>
+                    <li>You want the easiest development path</li>
+                    <li>Sub-5ms latency matters</li>
+                    <li>You need training + inference on same hardware</li>
+                    <li>Model has >10M parameters</li>
+                    <li>You can tolerate latency variability</li>
+                    <li>Time-to-market is critical</li>
+                    <li>Team lacks FPGA expertise</li>
+                </ul>
+            </div>
+
+            <div class="criteria-card fpga-card">
+                <h3>⚡ Choose FPGA If:</h3>
+                <ul class="criteria-list">
+                    <li>Power budget is &lt;5W (battery-powered edge)</li>
+                    <li>You can embed model weights in BRAM</li>
+                    <li>You need deterministic latency (zero jitter)</li>
+                    <li>You're integrating custom sensor preprocessing</li>
+                    <li>Deploying thousands of units (cost at scale)</li>
+                    <li>Model weights fit in &lt;2MB</li>
+                    <li>Infrequent model updates acceptable</li>
+                    <li>Team has FPGA design expertise</li>
+                    <li>Development time is flexible</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="result-node result-gpu">
+            <div class="result-title">🚀 GPU Winner Scenarios</div>
+            <ul class="result-reasons">
+                <li><strong>Cloud/datacenter inference:</strong> Power available, need max throughput</li>
+                <li><strong>Research & development:</strong> Fast iteration, easy debugging</li>
+                <li><strong>Large models:</strong> BERT, GPT-style transformers (&gt;100M params)</li>
+                <li><strong>Training + inference:</strong> Same hardware for both workloads</li>
+                <li><strong>Batch processing:</strong> Process 100s of images together</li>
+            </ul>
+        </div>
+
+        <div class="result-node result-fpga">
+            <div class="result-title">⚡ FPGA Winner Scenarios</div>
+            <ul class="result-reasons">
+                <li><strong>Autonomous drones:</strong> 1-2W power budget, deterministic latency</li>
+                <li><strong>IoT edge devices:</strong> Battery-powered, low-bandwidth networks</li>
+                <li><strong>Medical devices:</strong> Deterministic behavior, custom sensor fusion</li>
+                <li><strong>Industrial control:</strong> Real-time guarantees, harsh environments</li>
+                <li><strong>Smart cameras:</strong> Integrated ISP + inference on single chip</li>
+            </ul>
+        </div>
+
+        <div class="quick-decision" style="background: #fff3e0; border-color: #ff9800;">
+            <h3 style="color: #e65100;">⚠️ Don't Choose FPGA If:</h3>
+            <ul class="criteria-list" style="margin-top: 15px;">
+                <li>You need frequent model updates (daily/weekly)</li>
+                <li>Your model has &gt;10M parameters</li>
+                <li>You don't have FPGA expertise in-house</li>
+                <li>Time-to-market is critical (&lt;3 months)</li>
+                <li>You want to use standard ML frameworks (PyTorch/TensorFlow)</li>
+                <li>Sub-millisecond latency is required</li>
+                <li>You need to support multiple model architectures</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

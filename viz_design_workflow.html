@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPGA Design Workflow: PyTorch to PYNQ</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .workflow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stage {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 6px solid;
+            position: relative;
+        }
+        .stage-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #2196F3;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .stage-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .stage-icon {
+            font-size: 32px;
+            margin-right: 15px;
+        }
+        .stage-title {
+            flex: 1;
+        }
+        .stage-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+        .stage-tool {
+            font-size: 13px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+        .stage-content {
+            margin-left: 47px;
+        }
+        .stage-description {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .stage-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .detail-item {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 3px;
+        }
+        .detail-value {
+            color: #333;
+        }
+        .code-snippet {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .code-comment {
+            color: #6a9955;
+        }
+        .code-keyword {
+            color: #569cd6;
+        }
+        .code-string {
+            color: #ce9178;
+        }
+        .arrow-down {
+            text-align: center;
+            font-size: 32px;
+            color: #2196F3;
+            margin: 10px 0;
+        }
+        .stage-1 { border-left-color: #FF6B6B; }
+        .stage-2 { border-left-color: #4ECDC4; }
+        .stage-3 { border-left-color: #45B7D1; }
+        .stage-4 { border-left-color: #FFA07A; }
+        .stage-5 { border-left-color: #98D8C8; }
+        .stage-6 { border-left-color: #6C5CE7; }
+        .stage-7 { border-left-color: #A29BFE; }
+        .timeline-summary {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+        .timeline-summary h3 {
+            margin-top: 0;
+            color: #6a1b9a;
+        }
+        .time-breakdown {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .time-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .time-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #6a1b9a;
+            margin: 10px 0;
+        }
+        .time-label {
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FPGA Design Workflow</h1>
+        <p class="subtitle">Complete pipeline from PyTorch training to PYNQ deployment</p>
+
+        <div class="workflow">
+            <!-- Stage 1: Model Training -->
+            <div class="stage stage-1">
+                <div class="stage-number">1</div>
+                <div class="stage-header">
+                    <div class="stage-icon">🧠</div>
+                    <div class="stage-title">
+                        <div class="stage-name">Model Training & Validation</div>
+                        <div class="stage-tool">PyTorch on Google Colab (Tesla T4)</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Train ReducedVGG model on CIFAR-10 dataset using PyTorch. Standard deep learning workflow 
+                        with data augmentation, Adam optimizer, and early stopping.
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Architecture</div>
+                            <div class="detail-value">ReducedVGG (1.44M params)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Test Accuracy</div>
+                            <div class="detail-value">86.94%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Training Time</div>
+                            <div class="detail-value">~20 epochs, 15 minutes</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">reduced_vgg_best.pth</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <!-- Stage 2: Quantization -->
+            <div class="stage stage-2">
+                <div class="stage-number">2</div>
+                <div class="stage-header">
+                    <div class="stage-icon">🔢</div>
+                    <div class="stage-title">
+                        <div class="stage-name">Post-Training Quantization</div>
+                        <div class="stage-tool">PyTorch Quantization API</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Apply INT16 weight-only quantization to reduce model size and prepare for FPGA fixed-point arithmetic.
+                        Tested 12 different quantization configs to find optimal accuracy/efficiency tradeoff.
+                    </div>
+                    <div class="code-snippet">
+<span class="code-comment"># Quantize to INT32, then convert to INT16</span>
+quantized_model = torch.quantization.quantize_dynamic(
+    model, {torch.nn.Linear, torch.nn.Conv2d}, 
+    dtype=torch.qint32
+)
+<span class="code-comment"># Export weights as binary files</span>
+<span class="code-keyword">for</span> name, tensor <span class="code-keyword">in</span> model.state_dict().items():
+    tensor.numpy().tofile(<span class="code-string">f"params_int32/{name}.bin"</span>)
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Quantization</div>
+                            <div class="detail-value">INT32 → INT16</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Accuracy Loss</div>
+                            <div class="detail-value">1.35% (86.94% → 85.59%)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Memory Reduction</div>
+                            <div class="detail-value">2× smaller (FP32 → INT16)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">60 .bin weight files (~2.8 MB)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <!-- Stage 3: Weight Conversion -->
+            <div class="stage stage-3">
+                <div class="stage-number">3</div>
+                <div class="stage-header">
+                    <div class="stage-icon">🔄</div>
+                    <div class="stage-title">
+                        <div class="stage-name">Fixed-Point Conversion</div>
+                        <div class="stage-tool">Python script (convert_weights.py)</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Convert INT32 quantized weights to ap_fixed&lt;16,12&gt; format (Q12.4) compatible with HLS.
+                        This involves rescaling from scale factor 65536 (2^16) to 16 (2^4).
+                    </div>
+                    <div class="code-snippet">
+<span class="code-comment"># INT32 uses scale of 65536 (2^16)</span>
+<span class="code-comment"># ap_fixed&lt;16,12&gt; needs scale of 16 (2^4 fractional bits)</span>
+fp32_data = int32_data / 65536.0
+fixed_data = np.round(fp32_data * 16.0)
+fixed_data = np.clip(fixed_data, -32768, 32767)
+<span class="code-keyword">return</span> fixed_data.astype(np.int16)
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Format</div>
+                            <div class="detail-value">ap_fixed&lt;16,12&gt; (Q12.4)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Range</div>
+                            <div class="detail-value">-2048 to +2047.9375</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Precision</div>
+                            <div class="detail-value">4 fractional bits (0.0625)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">48 parameter .bin files</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <!-- Stage 4: HLS Implementation -->
+            <div class="stage stage-4">
+                <div class="stage-number">4</div>
+                <div class="stage-header">
+                    <div class="stage-icon">⚙️</div>
+                    <div class="stage-title">
+                        <div class="stage-name">HLS C++ Implementation</div>
+                        <div class="stage-tool">Vitis HLS 2022.2</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Write hardware accelerator in C++ using Vitis HLS. Implement tiled convolution, batch normalization,
+                        pooling, and fully-connected layers with fixed-point arithmetic.
+                    </div>
+                    <div class="code-snippet">
+<span class="code-keyword">void</span> reduced_vgg_inference(
+    <span class="code-keyword">const</span> fm_t input[32*32*3],
+    fm_t output[10],
+    <span class="code-keyword">const</span> wt_t *W1, <span class="code-comment">// 96 weight pointers</span>
+    ...
+) {
+    #pragma HLS INTERFACE m_axi port=W1 bundle=gmem
+    #pragma HLS INTERFACE s_axilite port=return
+    
+    <span class="code-comment">// Tiled convolution with on-chip buffering</span>
+    tiled_conv_8x8(input, output, W1, B1);
+}
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">C Simulation</div>
+                            <div class="detail-value">✓ Passed (MSE=0)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Synthesis Time</div>
+                            <div class="detail-value">~15 minutes</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Clock Target</div>
+                            <div class="detail-value">15ns (66.7 MHz)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">IP catalog RTL</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <!-- Stage 5: Vivado Integration -->
+            <div class="stage stage-5">
+                <div class="stage-number">5</div>
+                <div class="stage-header">
+                    <div class="stage-icon">🔧</div>
+                    <div class="stage-title">
+                        <div class="stage-name">Vivado Block Design</div>
+                        <div class="stage-tool">Vivado 2022.2</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Integrate HLS IP with Zynq Processing System (PS). Connect accelerator to ARM cores via AXI
+                        interfaces for control and DDR memory access.
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Block Design</div>
+                            <div class="detail-value">PS7 + HLS IP + AXI interconnect</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Synthesis</div>
+                            <div class="detail-value">~20 minutes</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Implementation</div>
+                            <div class="detail-value">~45 minutes</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Timing</div>
+                            <div class="detail-value">✓ Closure (WNS: +0.183ns)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <!-- Stage 6: Bitstream Generation -->
+            <div class="stage stage-6">
+                <div class="stage-number">6</div>
+                <div class="stage-header">
+                    <div class="stage-icon">💾</div>
+                    <div class="stage-title">
+                        <div class="stage-name">Bitstream Generation</div>
+                        <div class="stage-tool">Vivado Implementation</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Generate final FPGA configuration bitstream and hardware handoff file for PYNQ deployment.
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Bitstream Size</div>
+                            <div class="detail-value">45 MB</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Power</div>
+                            <div class="detail-value">1.451W (41.7°C junction)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Resources</div>
+                            <div class="detail-value">70% BRAM, 62% LUT, 14% DSP</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">.bit + .hwh files</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <!-- Stage 7: PYNQ Deployment -->
+            <div class="stage stage-7">
+                <div class="stage-number">7</div>
+                <div class="stage-header">
+                    <div class="stage-icon">🎯</div>
+                    <div class="stage-title">
+                        <div class="stage-name">PYNQ Deployment & Testing</div>
+                        <div class="stage-tool">Python on PYNQ-Z2 Board</div>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-description">
+                        Load bitstream on PYNQ-Z2 board, configure AXI registers, load parameters into DDR, 
+                        and run inference on test images.
+                    </div>
+                    <div class="code-snippet">
+<span class="code-keyword">from</span> pynq <span class="code-keyword">import</span> Overlay
+
+overlay = Overlay(<span class="code-string">"design_1_wrapper.bit"</span>)
+accelerator = overlay.reduced_vgg_inference_0
+
+<span class="code-comment"># Configure 96 AXI address registers</span>
+<span class="code-keyword">for</span> i, addr <span class="code-keyword">in</span> enumerate(param_addresses):
+    accelerator.write(0x10 + i*8, addr)
+
+<span class="code-comment"># Run inference</span>
+accelerator.write(0x00, 0x01)  <span class="code-comment"># Start</span>
+<span class="code-keyword">while</span> accelerator.read(0x00) & 0x04 == 0:
+    <span class="code-keyword">pass</span>  <span class="code-comment"># Wait for done</span>
+                    </div>
+                    <div class="stage-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Latency</div>
+                            <div class="detail-value">466.53 ms</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Throughput</div>
+                            <div class="detail-value">2.14 img/s</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Accuracy</div>
+                            <div class="detail-value">85.59%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Power</div>
+                            <div class="detail-value">1.451W</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-summary">
+            <h3>⏱️ Development Timeline</h3>
+            <div class="time-breakdown">
+                <div class="time-card">
+                    <div class="time-label">Model Training</div>
+                    <div class="time-value">~1 day</div>
+                    <div class="time-label">Including architecture experiments</div>
+                </div>
+                <div class="time-card">
+                    <div class="time-label">HLS Development</div>
+                    <div class="time-value">~1 week</div>
+                    <div class="time-label">C++ implementation + optimization</div>
+                </div>
+                <div class="time-card">
+                    <div class="time-label">Vivado Integration</div>
+                    <div class="time-value">~3 days</div>
+                    <div class="time-label">Block design + synthesis</div>
+                </div>
+                <div class="time-card">
+                    <div class="time-label">PYNQ Deployment</div>
+                    <div class="time-value">~2 days</div>
+                    <div class="time-label">Python driver + testing</div>
+                </div>
+                <div class="time-card">
+                    <div class="time-label">Debugging</div>
+                    <div class="time-value">~1 week</div>
+                    <div class="time-label">Fixing timing/memory issues</div>
+                </div>
+                <div class="time-card">
+                    <div class="time-label">Total</div>
+                    <div class="time-value">~3 weeks</div>
+                    <div class="time-label">For someone new to FPGAs</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-summary" style="background: #e8f5e9; border-color: #4CAF50;">
+            <h3 style="color: #2e7d32;">🎓 Key Takeaways</h3>
+            <ul style="margin: 15px 0; padding-left: 20px; line-height: 1.8; color: #333;">
+                <li><strong>HLS abstracts hardware:</strong> C++ instead of VHDL makes FPGA accessible to software engineers</li>
+                <li><strong>Iteration is slow:</strong> Each Vivado synthesis + implementation takes ~1 hour</li>
+                <li><strong>Fixed-point is tricky:</strong> Choosing the right Q format requires experimentation</li>
+                <li><strong>Memory architecture matters most:</strong> 58× gap due to DDR access patterns</li>
+                <li><strong>Tools do heavy lifting:</strong> Vitis HLS + Vivado handle complexity, but constraints matter</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

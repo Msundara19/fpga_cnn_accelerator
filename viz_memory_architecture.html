@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Architecture: GPU vs FPGA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .platform {
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .gpu-platform {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #4CAF50;
+        }
+        .fpga-platform {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196F3;
+        }
+        .platform h2 {
+            margin-top: 0;
+            text-align: center;
+            font-size: 22px;
+        }
+        .architecture-box {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .arch-title {
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .arch-detail {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+        .metric-label {
+            color: #666;
+            font-size: 13px;
+        }
+        .metric-value {
+            font-weight: bold;
+            color: #1a1a1a;
+            font-size: 13px;
+        }
+        .bottleneck-callout {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .bottleneck-callout h3 {
+            margin-top: 0;
+            color: #e65100;
+            font-size: 16px;
+        }
+        .key-insight {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+        .key-insight h3 {
+            margin-top: 0;
+            color: #6a1b9a;
+            font-size: 18px;
+        }
+        .flow-diagram {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+        }
+        .step-number {
+            background: #2196F3;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .step-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+        .step-time {
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Memory Architecture: The 360× Performance Gap</h1>
+        <p class="subtitle">Why GPU demolished FPGA in this implementation</p>
+
+        <div class="comparison">
+            <!-- GPU Architecture -->
+            <div class="platform gpu-platform">
+                <h2>🚀 GPU (Tesla T4)</h2>
+                
+                <div class="architecture-box">
+                    <div class="arch-title">Memory Hierarchy</div>
+                    <div class="metric">
+                        <span class="metric-label">L2 Cache</span>
+                        <span class="metric-value">40 MB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">GDDR6 Memory</span>
+                        <span class="metric-value">16 GB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Bandwidth</span>
+                        <span class="metric-value">320 GB/s</span>
+                    </div>
+                </div>
+
+                <div class="architecture-box">
+                    <div class="arch-title">Compute Resources</div>
+                    <div class="metric">
+                        <span class="metric-label">CUDA Cores</span>
+                        <span class="metric-value">2,560</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Tensor Cores</span>
+                        <span class="metric-value">320</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Peak FP32</span>
+                        <span class="metric-value">8.1 TFLOPS</span>
+                    </div>
+                </div>
+
+                <div class="architecture-box">
+                    <div class="arch-title">Why It Won</div>
+                    <div class="arch-detail">
+                        ✓ Massive parallel threads hide memory latency<br>
+                        ✓ 320 GB/s bandwidth keeps compute fed<br>
+                        ✓ 40 MB L2 cache holds most parameters<br>
+                        ✓ Optimized CUDA libraries (cuDNN)<br>
+                        ✓ Memory access pattern optimized for CNNs
+                    </div>
+                </div>
+            </div>
+
+            <!-- FPGA Architecture -->
+            <div class="platform fpga-platform">
+                <h2>⚡ FPGA (Zynq-7020)</h2>
+                
+                <div class="architecture-box">
+                    <div class="arch-title">Memory Hierarchy</div>
+                    <div class="metric">
+                        <span class="metric-label">On-chip BRAM</span>
+                        <span class="metric-value">560 KB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DDR3 Memory</span>
+                        <span class="metric-value">512 MB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Bandwidth</span>
+                        <span class="metric-value">~2.1 GB/s</span>
+                    </div>
+                </div>
+
+                <div class="architecture-box">
+                    <div class="arch-title">Compute Resources</div>
+                    <div class="metric">
+                        <span class="metric-label">DSP Slices</span>
+                        <span class="metric-value">220</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">LUTs</span>
+                        <span class="metric-value">53,200</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Clock Speed</span>
+                        <span class="metric-value">66.7 MHz</span>
+                    </div>
+                </div>
+
+                <div class="architecture-box">
+                    <div class="arch-title">The Bottleneck</div>
+                    <div class="arch-detail">
+                        ⚠ Only 560 KB on-chip BRAM<br>
+                        ⚠ 2.8 MB model weights in DDR3<br>
+                        ⚠ Single AXI master (sequential access)<br>
+                        ⚠ 152× slower memory bandwidth<br>
+                        ⚠ Tiled convolution = many DDR round-trips
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-diagram">
+            <h3 style="margin-top: 0; color: #1a1a1a;">FPGA Inference Flow (Single 8×8 Tile)</h3>
+            <div class="flow-step">
+                <div class="step-number">1</div>
+                <div class="step-text">
+                    Fetch 8×8 input tile from DDR3 to BRAM
+                    <div class="step-time">⏱ Memory bound - waiting on DDR</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="step-number">2</div>
+                <div class="step-text">
+                    Fetch corresponding weights from DDR3
+                    <div class="step-time">⏱ Memory bound - waiting on DDR</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="step-number">3</div>
+                <div class="step-text">
+                    Compute convolution in FPGA fabric
+                    <div class="step-time">⚡ Fast! DSP slices at work</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="step-number">4</div>
+                <div class="step-text">
+                    Write output tile back to DDR3
+                    <div class="step-time">⏱ Memory bound - waiting on DDR</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="step-number">5</div>
+                <div class="step-text">
+                    Repeat for all tiles (32×32 image = hundreds of tiles)
+                    <div class="step-time">🔁 Each iteration stalls on memory</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottleneck-callout">
+            <h3>The 58× Mystery Solved</h3>
+            <p style="margin: 0; line-height: 1.6; color: #333;">
+                <strong>HLS synthesis predicted:</strong> 7.98 ms minimum latency<br>
+                <strong>Actual hardware measured:</strong> 466.5 ms<br>
+                <strong>Gap:</strong> 58× slower than theoretical<br><br>
+                
+                This gap is entirely due to DDR3 memory accesses. The FPGA spent 98.5% of execution time 
+                waiting for data transfers, not computing. With weights embedded in BRAM, we'd achieve 
+                near-theoretical 7.98 ms performance.
+            </p>
+        </div>
+
+        <div class="key-insight">
+            <h3>💡 Key Insight: Memory Bandwidth Dominates Everything</h3>
+            <p style="margin: 0; line-height: 1.8; color: #333;">
+                The GPU didn't win because it computed faster — it won because it <em>starved less</em>.<br><br>
+                
+                <strong>GPU advantage:</strong> 320 GB/s ÷ 2.1 GB/s = <strong>152× more memory bandwidth</strong><br><br>
+                
+                For CNN inference, memory access patterns matter more than raw compute power. 
+                The GPU's massive bandwidth and sophisticated caching kept its 2,560 cores fed with data. 
+                The FPGA's 220 DSP slices spent most of their time idle, waiting for the next DDR transfer.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

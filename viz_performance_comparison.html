@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU vs FPGA Performance Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #1a1a1a;
+            margin-top: 0;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <h2>Latency & Throughput Comparison</h2>
+        <p class="subtitle">Lower latency and higher throughput are better</p>
+        <canvas id="latencyChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>Power & Energy Efficiency</h2>
+        <p class="subtitle">Power consumption and energy per inference</p>
+        <canvas id="powerChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>Performance Score (Accuracy/Latency)</h2>
+        <p class="subtitle">Higher is better - GPU wins by 366×</p>
+        <canvas id="scoreChart"></canvas>
+    </div>
+
+    <script>
+        // Chart.js default configuration
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif';
+        Chart.defaults.font.size = 13;
+
+        // Latency & Throughput Chart
+        const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+        new Chart(latencyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Latency (ms)', 'Throughput (img/s)'],
+                datasets: [{
+                    label: 'GPU (Tesla T4)',
+                    data: [1.296, 771.5],
+                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                    borderColor: 'rgba(76, 175, 80, 1)',
+                    borderWidth: 2
+                }, {
+                    label: 'FPGA (Zynq-7020)',
+                    data: [466.53, 2.14],
+                    backgroundColor: 'rgba(33, 150, 243, 0.8)',
+                    borderColor: 'rgba(33, 150, 243, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toFixed(2);
+                                if (context.dataIndex === 0) {
+                                    label += ' ms';
+                                } else {
+                                    label += ' img/s';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Power Chart
+        const powerCtx = document.getElementById('powerChart').getContext('2d');
+        new Chart(powerCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Power (W)', 'Energy/Inference (J)'],
+                datasets: [{
+                    label: 'GPU (Tesla T4)',
+                    data: [70, 0.091],
+                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                    borderColor: 'rgba(76, 175, 80, 1)',
+                    borderWidth: 2
+                }, {
+                    label: 'FPGA (Zynq-7020)',
+                    data: [1.451, 0.677],
+                    backgroundColor: 'rgba(33, 150, 243, 0.8)',
+                    borderColor: 'rgba(33, 150, 243, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toFixed(3);
+                                if (context.dataIndex === 0) {
+                                    label += ' W';
+                                } else {
+                                    label += ' J';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Performance Score Chart
+        const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+        new Chart(scoreCtx, {
+            type: 'bar',
+            data: {
+                labels: ['GPU (Tesla T4)', 'FPGA (Zynq-7020)', 'FPGA (Theoretical Min)'],
+                datasets: [{
+                    label: 'Score (Accuracy/Latency)',
+                    data: [67.07, 0.183, 10.73],
+                    backgroundColor: [
+                        'rgba(76, 175, 80, 0.8)',
+                        'rgba(33, 150, 243, 0.8)',
+                        'rgba(255, 152, 0, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(76, 175, 80, 1)',
+                        'rgba(33, 150, 243, 1)',
+                        'rgba(255, 152, 0, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Score: ' + context.parsed.y.toFixed(2) + ' acc/ms';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Accuracy / Latency (acc/ms)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
